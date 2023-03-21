@@ -1,0 +1,44 @@
+#+title: Functional Programming Assignment
+#+AUTHOR:    Zachary Teo
+#+EMAIL:     zackteo@gmail.com
+#+DATE:      Due: 7 April 2023 (Fri)
+
+* Task
+In groups of 2 (or 3), create a simple command line tool in Babashka.
+
+- e.g. CLI tool to:
+  - [[https://github.com/AlDanial/cloc][analyse a programming project (lines of code, comments etc)]]
+  - convert currency
+  - calculate total size of a folder, etc
+
+* Notes
+- Try to make something presentable for your git portfolio
+- A tool that you might genuinely use
+- An Earnest Failure has Meaning - try to put in genuine effort and grow from this experience
+
+* Deliverables
+- code as a working Babashka executable
+- with instructions/README on how to use the executable
+- document explaining how and where you have used functional programming concepts in the project
+
+
+* Rubrics
+|                   | Points |
+|-------------------+--------|
+| Below Target (BT) | 0, 0.5 |
+| On Target (OT)    | 1, 1.5 |
+| Above Target (AT) | 2, 2.5 |
+|-------------------+--------|
+
+** Functional Programming Concepts
+- BT: Explanation of 0 or 1 FP concepts used
+- OT: Explanation of 2 to 3 FP Concepts used
+- AT: Explanation of 4 to 5 FP Concepts used
+** Code
+- BT: Coding Clojure like an imperative language
+- OT: Some hints of using Clojure as a FP language
+- AT: Good wield of Clojure
+** Usability
+- BT: Non-extensible, only works for very specific context
+- OT: Could use some more refinement
+- AT: Tool that I can see myself or others genuinely using

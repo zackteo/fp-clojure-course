@@ -1,0 +1,429 @@
+#+title:     L1 - Introduction to FP
+#+AUTHOR:    Zachary Teo
+#+EMAIL:     zackteo@gmail.com
+#+DATE:      2023-03-22 Wed
+#+OPTIONS: H:2 toc:t num:t
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Madrid
+#+BEAMER_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{Presentat‌​‌​ion agenda}\tableofcontents[currentsection]\end{frame}}
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+
+* Introduction and Expectations
+** About myself
+#+ATTR_LATEX: :width 100px
+[[./images/L1/zackteo.jpg]]
+*** Zachary (Zack)
+- DBS (ADA/DATA - Big Data)
+  - Software Engineer
+    - Metadata project
+  - Data Engineer
+    - Observability + Apache Flink
+- Done a fair share of using Clojure in anger
+** About myself
+*** A
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :END:
+#+ATTR_LATEX: :width 50px
+[[./images/L1/clojure-asia-logo.png]]
+*** B
+    :PROPERTIES:
+    :BEAMER_col: 0.7
+    :END:
+#+ATTR_LATEX: :width 200px
+[[./images/L1/clojure-asia-202206-group-photo.png]]
+*** C
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :END:
+- Clojure Asia (Since 2021-11)
+- Been venturing into Clojure since 2020
+** Course Academic Expectations
+- Assignment (33%)
+- Exams (67%)
+#+begin_comment
+Not making y'all recite definitions
+#+end_comment
+** My own hopes and expectations
+- Enjoy yourselves
+- Broaden your perspectives; and learn a thing or two
+- Good learning experience for both sides
+** Reference Materials
+*** Grokking Simplicity
+    :PROPERTIES:
+    :BEAMER_col: 0.6
+    :END:
+  #+ATTR_LATEX: :width 150px
+  [[./images/L1/grokking-simplicity-cover.png]]
+*** Grokking FP
+    :PROPERTIES:
+    :BEAMER_col: 0.4
+    :END:
+#+ATTR_LATEX: :width 70px
+[[./images/L1/grokking-fp-cover.png]]
+* What is Functional Programming?
+** Buzz: Functional Programming?
+- What is Functional Programming?
+** Paraphrasing from Wikipedia
+functional programming (FP), noun.
+- a programming paradigm characterized by the use of mathematical functions and the _avoidance of side effects_
+- a programming style that uses only _pure functions without side effects_
+
+#+begin_comment
+Any problems with this definition?
+#+end_comment
+** What are side effects?
+Side effects?
+- Anything a function does other than returning a value
+- For example: sending an email or modifying global state
+
+** Problems with side effects
+- side effects happen every time your function is called
+- If you need the return value and not the side effects, you’ll cause things to happen unintentionally.
+
+** Definition we will use
+*** Functional thinking
+Functional thinking is the set of skills and ideas that functional programmers use to solve problems with software
+ 1. Distinguishing actions, calculations, and data
+ 2. Using first-class abstractions
+#+begin_comment
+These are not the only ideas in FP, but they will give you a solid and practical foundation on which to build. And they will take you from beginner to professional functional programmer.
+#+end_comment
+** Before we continue ...
+- Any Questions?
+* Actions, Calculations and Data
+** Actions
+- Anything that depends on when it is run, or how many times it is run, or both, is an action.
+- If I send an urgent email today, it’s much different from sending it next week. And of course, sending the same email 10 times is different from sending it 0 times or 1 time.
+
+#+begin_comment
+Actions:
+- Tools for safely changing state over time
+- Ways to guarantee ordering
+- Tools to ensure actions happen exactly once
+#+end_comment
+
+** Calculations
+- Computations from input to output
+- same input -> same output
+- Call them anytime, anywhere, and it won’t affect anything outside of them.
+- Really easy to test and safe to use without worrying about how many times or when they are called.
+
+#+begin_comment
+Calculations:
+- Static analysis to aid correctness
+- Mathematical tools that work well for software
+- Testing strategies
+#+end_comment
+** Data
+- Recorded facts about events
+- We distinguish data because it is not as complex as executable code.
+- It has well-understood properties.
+- Data is interesting because it is meaningful without being run. It can be interpreted in multiple ways.
+- Take a restaurant receipt as an example: It can be used by the restaurant manager to determine which food items are popular. And it can be used by the customer to track their dining-out budget.
+
+#+begin_comment
+Data
+- Ways to organize data for efficient access
+- Disciplines to keep records long term
+- Principles for capturing what is important using data
+#+end_comment
+** A new marketing tactic at CouponDog
+- CouponDog has a huge list of people interested in coupons. They send out a weekly email newsletter full of coupons. People love it!
+
+- In order to grow the list, the chief marketing officer (CMO) has a plan. If someone recommends CouponDog to 10 of their friends, they get better coupons.
+
+- The company has a big database table of email addresses. Along with that, they have counted how many times each person has recommended CouponDog to their friends.
+
+- They also have a database of coupons. These are ranked as “bad,” “good,” and “best.” The “best” coupons are reserved for people who recommend a lot. Everyone else gets “good” coupons. They never send out “bad” coupons.
+
+** Given a situation
+#+ATTR_LATEX: :width 200px
+[[./images/L1/gs-coupon.png]]
+- Refer 10 friends and get better coupons.
+** Given a situation
+- What code is needed for a referral plan
+- some examples to get you started
+  - send an email
+  - read subscribers from the database
+  - rank of each coupon
+** Exercise
+|  1 | Send an email                         |
+|  2 | Read subscribers from the database    |
+|  3 | The ranking of each coupon            |
+|  4 | Reading the coupons from the database |
+|  5 | The subject of the email              |
+|  6 | An email address                      |
+|  7 | A recommendation count                |
+|  8 | Deciding which email someone gets     |
+|  9 | A subscriber record                   |
+| 10 | A coupon record                       |
+| 11 | A list of coupon records              |
+| 12 | A list of subscriber records          |
+| 13 | The body of the email                 |
+** Answer
+|  1 | Send an email                         | A |
+|  2 | Read subscribers from the database    | A |
+|  3 | The ranking of each coupon            | D |
+|  4 | Reading the coupons from the database | A |
+|  5 | The subject of the email              | D |
+|  6 | An email address                      | D |
+|  7 | A recommendation count                | D |
+|  8 | Deciding which email someone gets     | C |
+|  9 | A subscriber record                   | D |
+| 10 | A coupon record                       | D |
+| 11 | A list of coupon records              | D |
+| 12 | A list of subscriber records          | D |
+| 13 | The body of the email                 | D |
+* Introduction to Clojure
+** Buzz: Classifying Programming Languages
+- What attributes do you use to describe programming languages?
+** Clojure compared to Python
+|          | Clojure | Python                 | Java            |
+|----------+---------+------------------------+-----------------|
+| Type     | Dynamic | Dynamic                | Static          |
+|----------+---------+------------------------+-----------------|
+| Paradigm | FP      | Procedural             | Object-Oriented |
+|----------+---------+------------------------+-----------------|
+| Syntax   | Lisp    | C-like w lots of sugar | C-like          |
+|----------+---------+------------------------+-----------------|
+** Where else does Clojure fit?
+- JVM languages
+  - Java, Scala, Kotlin, Groovy
+- Functional programming languages
+  - Elixir, F#, Haskell, Scala
+- LISPs
+  - Common Lisp, Scheme, Racket, Emacs Lisp
+- Dynamic
+  - Python, JavaScript
+** Appeal to authority
+#+ATTR_LATEX: :width 100px
+[[./images/L1/java-concurrency-cover.png]]
+Why Brian Goetz (Java language architect) prefers Clojure over Scala and Kotlin
+https://www.youtube.com/watch?v=GedrGWu16_I&list=LL-lFQ4lY7S3Eqi1fpZL4caA
+** Features
+- Functional Programming (First-class functions, Immutable Data Structures)
+- Dynamic Development (REPL)
+- Lisp (Structural Editing)
+- Hosted (JVM)
+** Syntax
+#+ATTR_LATEX: :width 200px
+[[./images/L1/clojure-syntax.png]]
+** Syntax
+- clojure
+#+begin_src clojure
+(+ 1 2 3 4 5)
+#+end_src
+
+- python
+#+begin_src py
+1 + 2 + 3 + 4 + 5
+#+end_src
+** Setting up Clojure - or rather Babashka
+#+ATTR_LATEX: :width 100px
+[[./images/L1/babashka-logo.png]]
+https://github.com/babashka/babashka#installation
+** A bit of Clojure
+#+begin_src clojure
+
+;; Creating a variable (constant)
+;; x -> symbol
+;; 7 -> value
+(def x 7)
+
+(+ x x)
+;;=> 14
+
+;;    name  params        body
+;;    ----- ------ --------------------
+(defn greet [name] (str "Hello, " name))
+#+end_src
+
+* Deep dive into action calculation data
+** Deep dive: Data
+*** What is data?
+- Data is facts about events. It is a record of something that happened. Functional programmers tap into the rich tradition of record-keeping that started thousands of years ago.
+** Deep dive: Data
+*** How do we implement data?
+- Data is implemented in Clojure using the built-in data types. These include numbers, strings, arrays, and objects, among others. Other languages have more sophisticated ways of implementing data. For instance, Haskell lets you define new data types that encode the important structure of your domain.
+** Deep dive: Data
+*** How does data encode meaning
+- Data encodes meaning in structure.
+- The structure of your data should mirror the structure of the problem domain you are implementing.
+- For instance, if the order of a list of names is important, you should choose a data structure that maintains order.
+*** Examples
+- A list of foods to buy
+- Your first name
+- My phone number
+- A receipt for a meal
+** Deep dive: Data
+*** What are the advantages of data?
+- Data is useful mostly because of what it can’t do.
+  - Inert - Unlike actions and calculations, it cannot be run. Lets it be well understood.
+- Serializable. Actions and calculations have trouble being serialized to be run on another machine without a lot of trouble. Data, however, has no problem being transmitted over a wire or stored to disk and read back later. Well-preserved data can last for thousands of years. Will your data last that long? I can’t say. But it sure will last longer than code for a function.
+** Deep dive: Data
+*** What are the advantages of data?
+- Compare for equality. You can easily compare two pieces of data to see if they are equal. This is impossible for calculations and actions.
+- Open for interpretation. Data can be interpreted in multiple ways. Server access logs can be mined to debug problems. But they can also be used to know where your traffic is coming from. Both use the same data, with different interpretations.
+** Deep dive: Data
+*** Disadvantages
+- Interpretation is a double-edged sword. Although it’s an advantage that data can be interpreted in different ways, it is a disadvantage that data must be interpreted to be useful. A calculation can run and be useful, even if we don’t understand it. But data needs a machine to interpret it. Data has no meaning without interpretation. It’s just bytes.
+- Much of the skill of functional programming is about how to represent data so that it can be interpreted now and reinterpreted in the future.
+** Data in Clojure
+#+begin_src clojure
+;; Data
+42        ; integer
+-1.5      ; floating point
+22/7      ; ratio
+
+"hello"         ; string
+\e              ; character
+#"[0-9]+"       ; regular expression
+#+end_src
+** Data in Clojure
+#+begin_src clojure
+map             ; symbol
++               ; symbol - most punctuation allowed
+clojure.core/+  ; namespaced symbol
+nil             ; null value
+true false      ; booleans
+:alpha          ; keyword
+:release/alpha  ; keyword with namespace
+
+;; Collections
+'(1 2 3)     ; list
+[1 2 3]      ; vector
+#{1 2 3}     ; set
+{:a 1, :b 2} ; map
+
+#+end_src
+** Brain Break
+- How might you represent xlsx data in Clojure?
+** HTTP request as a map
+Data instead of Classes in the wild
+https://www.youtube.com/watch?v=aSEQfqNYNAc&t=187s
+** Deep dive: Calculations
+*** What are calculations?
+- Calculations are computations from inputs to outputs.
+- No matter when they are run, or how many times they are run, they will give the same output for the same inputs.
+*** How do we implement calculations?
+- We typically represent calculations as functions
+- In languages without functions, we would have to use something else, like a class with a method.
+** Deep dive: Calculations
+*** How do calculations encode meaning?
+- Calculations encode meaning as computation. A calculation represents some computation from inputs to outputs.
+- When or how you use it depends on whether that calculation is appropriate for the situation.
+** Deep dive: Calculations
+*** Why prefer calculations to actions?
+- They’re much easier to test. You can run them as many times as you want or wherever you want (local machine, build server, testing machine) in order to test them.
+- They’re easier to analyse by a machine. A lot of academic research has gone into what’s called “static analysis.” It’s essentially automated checks that your code makes sense. We won’t get into that in this book.
+- They’re very composable. Calculations can be put together into bigger calculations in very flexible ways. They can also be used in what are called “higher-order” calculations. We’ll get to those in chapter 14.
+- Much of functional programming is doing with calculations what is typically done with actions outside of FP.
+** Deep dive: Calculations
+*** Examples of calculations
+- Addition and multiplication
+- String concatenation
+- Planning a shopping trip
+** Deep dive: Calculations
+*** What worries do calculations avoid?
+- Functional programmers prefer using calculations instead of actions when possible because calculations are so much easier to understand. You can read the code and know what it is going to do.
+- There’s a whole list of things you don’t have to worry about:
+  - What else is running at the same time
+  - What has run in the past and what will run in the future
+  - How many times you have already run it
+** Deep dive: Calculations
+*** Disadvantage
+- Calculations do have their downside, which they share with actions. You can’t really know what calculations or actions are going to do without running them.
+- Of course, you, the programmer, can read the code and sometimes see what it will do. But as far as your running software is concerned, a function is a black box. You give it some inputs and an output comes out. You can’t really do much else with a function except run it.
+- If you can’t live with this disadvantage and you need something understandable, you must use data instead of calculations or actions.
+*** What are they typically called?
+- Outside of this book, calculations are typically called pure functions or mathematical functions. We call them calculations to avoid ambiguities with specific language features such as Clojure functions.
+** Calculations in Clojure (Brain break)
+#+begin_src clojure
+(defn add [a b]
+  (+ a b))
+#+end_src
+Your Turn (You may use first and count)
+- increment
+- cube
+- get-first-character
+- word-score (length)
+** Deep dive: Actions
+*** What are actions?
+- Actions are anything that have an effect on the world or are affected by the world.
+- As a rule of thumb, actions depend on when or how many times they are run.
+  - When they are run — Ordering
+  - How many times they are run — Repetition
+** Deep dive: Actions
+*** How are actions implemented?
+- In Clojure, like most languages, we use functions to implement actions. But by convention, we typically end the function name with a bang like 'swap!'
+*** How do actions encode meaning?
+- The meaning of an action is the effect it has on the world. We should make sure the effect it has is the one we want.
+** Deep dive: Actions
+*** Examples
+- Sending an email
+- Withdrawing money from an account
+- Modifying a global variable
+- Sending a HTTP request
+** Deep dive: Actions
+*** What are they typically called?
+- Actions are typically called impure functions, side-effecting functions, or functions with side effects. We call them actions to avoid ambiguities with specific language features such as Clojure functions.
+*** Are actions important in functional programming?
+- Actions are super important in functional programming
+  -  We’ll be learning how to work with their limitations.
+- Actions pose a tough bargain
+  - They are a pain to deal with.
+  - They are the reason we run our software in the first place.
+** Deep dive: Actions
+*** How do we deal with actions?
+- Functional programmers accept the bargain, and they have a bag of tricks for how to best deal with actions.
+- Use fewer actions if possible. We can never get all the way down to zero actions, but if an action isn’t required, use a calculation instead.
+- Keep your actions small. Remove everything that isn’t necessary from the action. For instance, you can extract a planning stage, implemented as a calculation, from the execution stage, where the necessary action is carried out.
+** Deep dive: Actions
+*** How do we deal with actions?
+- Restrict your actions to interactions with the outside. Your actions are all of those things that are affected by the world outside or can affect the world outside. Inside, ideally, is just calculations and data. More about this when we talk about the onion architecture.
+- Limit how dependent on time an action is. Functional programmers have techniques for making actions a little less difficult to work with. These techniques include making actions less dependent on when they happen and how many times they are run. (idempotent operations)
+#+begin_comment
+Most of the time, when we send the message, we get a response saying, "Yes, I sent it, good job, it all worked." Every now and then, we don't hear back. Send a message, and the request times out. We waited a long time, we don't hear anything back.
+
+What happened? Did it send the message, and then crash? Or, did our request never get there, so it never sent the message? We don't know. Did the message get sent or not? We have no idea. It could be either. We want to send this thing again, just in case, right?
+
+Then, if we send it again, it's going to be either it sends it one time, or it sends it twice. We don't want that. We want it to be exactly one time. We need to manage this. We need to make it so that we can control how many times it sends, and make sure it's exactly once.
+
+Functional programming has a technique for this. What you essentially need to do is make the action idempotent. Make the message idempotent. When I send this message, the server will recognize whether it has already sent this particular email already. If it has, then it just says, "OK, good." If it hasn't, then it sends it.
+
+That will allow my system to send the same message twice without any problem. I can send the message to request that email be sent twice in case there's a time out, in case there's a networking issue, in case I crash in the middle and I can't remember where I was, and I'm just trying to recover.
+
+This is another technique for controlling the number of times that this email gets sent, and divorcing it from the number of times I request that it be sent. This is another technique that functional programmers use to manage time, to manage these necessary actions, and make sure they do what we expect with the least complexity possible.
+#+end_comment
+** Actions in Clojure (Brain break)
+#+begin_src clojure
+(slurp full-file-path)
+#+end_src
+How to add libraries
+** Brain break
+- Let's take a break
+* Extracting Calculations from actions
+** MegaMart
+- MegaMart is an online store. One of its key features, and how it stays competitive, is that the shopping cart always shows you the total cost of its contents—even while you’re shopping
+** Learning Points
+- Actions spread. We only have to identify one action inside a function for the whole function to be an action.
+- Functions that are actions will have implicit inputs and outputs.
+- Calculations have no implicit inputs or outputs by definition.
+- Shared variables (such as globals) are common implicit inputs and outputs.
+- Implicit inputs can often be replaced by arguments.
+- Implicit outputs can often be replaced by return values.
+- As we apply functional principles, we’ll find the ratio of code in actions to code in calculations shifting toward calculations.
+
+* Improving the design of actions
+** Implicit vs explicit inputs and outputs
+#+ATTR_LATEX: :width 200px
+[[./images/L1/gs-implicit-explicit-io.png]]
+** Design
+#+ATTR_LATEX: :width 200px
+[[./images/L1/gs-design.png]]
+** Learning Points
+- In general, we want to eliminate implicit inputs and outputs by replacing them with arguments and return values.
+- Design is about pulling things apart. They can always be put back together.
+- As we pull things apart, and as functions have single responsibilities, we will find that they are easy to organize around concepts.
