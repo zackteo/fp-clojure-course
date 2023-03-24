@@ -318,7 +318,7 @@ https://www.youtube.com/watch?v=aSEQfqNYNAc&t=187s
 *** Why prefer calculations to actions?
 - They’re much easier to test. You can run them as many times as you want or wherever you want (local machine, build server, testing machine) in order to test them.
 - They’re easier to analyse by a machine. A lot of academic research has gone into what’s called “static analysis.” It’s essentially automated checks that your code makes sense. We won’t get into that in this book.
-- They’re very composable. Calculations can be put together into bigger calculations in very flexible ways. They can also be used in what are called “higher-order” calculations. We’ll get to those in chapter 14.
+- They’re very composable. Calculations can be put together into bigger calculations in very flexible ways. They can also be used in what are called “higher-order” calculations.
 - Much of functional programming is doing with calculations what is typically done with actions outside of FP.
 ** Deep dive: Calculations
 *** Examples of calculations
@@ -404,26 +404,3 @@ This is another technique for controlling the number of times that this email ge
 How to add libraries
 ** Brain break
 - Let's take a break
-* Extracting Calculations from actions
-** MegaMart
-- MegaMart is an online store. One of its key features, and how it stays competitive, is that the shopping cart always shows you the total cost of its contents—even while you’re shopping
-** Learning Points
-- Actions spread. We only have to identify one action inside a function for the whole function to be an action.
-- Functions that are actions will have implicit inputs and outputs.
-- Calculations have no implicit inputs or outputs by definition.
-- Shared variables (such as globals) are common implicit inputs and outputs.
-- Implicit inputs can often be replaced by arguments.
-- Implicit outputs can often be replaced by return values.
-- As we apply functional principles, we’ll find the ratio of code in actions to code in calculations shifting toward calculations.
-
-* Improving the design of actions
-** Implicit vs explicit inputs and outputs
-#+ATTR_LATEX: :width 200px
-[[./images/L1/gs-implicit-explicit-io.png]]
-** Design
-#+ATTR_LATEX: :width 200px
-[[./images/L1/gs-design.png]]
-** Learning Points
-- In general, we want to eliminate implicit inputs and outputs by replacing them with arguments and return values.
-- Design is about pulling things apart. They can always be put back together.
-- As we pull things apart, and as functions have single responsibilities, we will find that they are easy to organize around concepts.

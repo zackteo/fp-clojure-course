@@ -1,0 +1,769 @@
+#+title:     L2 - FP in the wild
+#+AUTHOR:    Zachary Teo
+#+EMAIL:     zackteo@gmail.com
+#+DATE:      2023-03-24 Fri
+#+OPTIONS: H:2 toc:t num:t
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Madrid
+#+BEAMER_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{Presentat‌​‌​ion agenda}\tableofcontents[currentsection]\end{frame}}
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+
+* Recap / Where we left off
+** Recap
+*** Introduction to Functional Programming
+  - its typical definition that has a tendency to mislead people
+  - and how we will approach with Functional thinking
+*** Data, Calculations and Actions
+  - What they are and how to distinguish them in a scenario
+** Recap
+*** Introduction to Clojure
+  - how its features compare to languages you already know
+*** Deep dive into data, calculations and actions
+  - Data > Calculations > Actions
+  - All are necessary and it is about learning how to manage their trade offs
+  - Showcase with some practice how the data, calculations and actions might be like in Clojure
+** Questions for me to answer
+- what's the difference between a list and a vector
+  - https://stackoverflow.com/questions/1147975/in-clojure-when-should-i-use-a-vector-over-a-list-and-the-other-way-around
+** Actions in Clojure
+- went through some code calling doing api call (action)
+- let's go through some smaller actions in Clojure
+
+#+begin_src clojure
+;; Actions
+(println "Hi")
+
+(Thread/sleep 1000)
+
+(def x 100)
+
+(rand-int 6)
+#+end_src
+* Extracting Calculations from actions
+** Code smells
+A code smell is a characteristic of a piece of code that might be a symptom of deeper problems
+- duplicate code
+- data classes
+** Broken windows
+Don't leave "broken windows" (bad designs, wrong decisions, or poor code) unrepaired.
+#+begin_comment
+- Fix each one as soon as it is discovered. If there is insufficient time to fix it properly, then board it up. Perhaps you can comment out the offending code, or display a "Not Implemented" message, or substitute dummy data instead. Take some action to prevent further damage and to show that you're on top of the situation.
+#+end_comment
+
+#+ATTR_LATEX: :width 200px=
+[[./images/l2/screenshot_20230323_212019.png]]
+** Welcome to MegaMart.com!
+- MegaMart is an online store. One of its key features, and how it stays competitive, is that the shopping cart always shows you the total cost of its contents—even while you’re shopping
+#+ATTR_LATEX: :width 200px
+  [[./images/l2/screenshot_20230324_051514.png]]
+** Start
+#+latex: \scriptsize
+#+begin_src js
+var shopping_cart = [];
+var shopping_cart_total = 0;
+
+function add_item_to_cart(name, price) {
+    shopping_cart.push({
+        name: name,
+        price: price
+    });
+    calc_cart_total();
+}
+
+function calc_cart_total() {
+    shopping_cart_total = 0;
+    for(var i = 0; i < shopping_cart.length; i++) {
+        var item = shopping_cart[i];
+        shopping_cart_total += item.price;
+    }
+    set_cart_total_dom();
+}
+#+end_src
+
+#+begin_comment
+\tiny, \scriptsize, \footnotesize, \small, \normalsize (default), \large, \Large, \LARGE, \huge and \Huge.
+#+end_comment
+** New assignment
+#+ATTR_LATEX: :width 250px
+[[./images/l2/screenshot_20230323_214324.png]]
+
+We also need to calculate the amount of tax and update it every time the cart total changes. Again, this will be easy to add to the existing implementation, but this isn’t the functional programming way.
+** Imperative vs declarative programming
+Imagine we are tasked with creating a function that calculates a score in some word-based game. A player submits a word, and the function returns a score. One point is given for each character in the word
+
+*** Calculating the score imperatively
+#+begin_src js
+function calculate_score(word){
+    var score = 0;
+    for (const c of word) {
+        console.log(c)
+    }
+    return score;
+}
+#+end_src
+*** Calculating the score declaratively
+#+begin_src js
+function word_score(word){
+    return word.length;
+}
+#+end_src
+** It works; ship it!
+*** A
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+var shopping_cart = [];
+var shopping_cart_total = 0;
+
+function add_item_to_cart(name, price) {
+    shopping_cart.push({
+        name: name,
+        price: price
+    });
+    calc_cart_total();
+}
+
+function update_shipping_icons() {
+    var buy_buttons = get_buy_buttons_dom();
+    for(var i = 0; i < buy_buttons.length; i++) {
+        var button = buy_buttons[i];
+        var item = button.item;
+        if(item.price + shopping_cart_total >= 20)
+            button.show_free_shipping_icon();
+        else
+            button.hide_free_shipping_icon();
+    }
+}
+#+end_src
+*** B
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+function update_tax_dom() {
+    set_tax_dom(shopping_cart_total * 0.10);
+}
+
+function calc_cart_total() {
+    shopping_cart_total = 0;
+    for(var i = 0; i < shopping_cart.length; i++) {
+        var item = shopping_cart[i];
+        shopping_cart_total += item.price;
+    }
+    set_cart_total_dom();
+    update_shipping_icons();
+    update_tax_dom();
+}
+#+end_src
+*** C
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+- Can you identify the actions, calculations and data?
+** It works; ship it!
+*** A
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+var shopping_cart = []; A
+var shopping_cart_total = 0; A
+
+function add_item_to_cart(name, price) { A
+    shopping_cart.push({
+        name: name,
+        price: price
+    });
+    calc_cart_total();
+}
+
+function update_shipping_icons() { A
+    var buy_buttons = get_buy_buttons_dom();
+    for(var i = 0; i < buy_buttons.length; i++) {
+        var button = buy_buttons[i];
+        var item = button.item;
+        if(item.price + shopping_cart_total >= 20)
+            button.show_free_shipping_icon();
+        else
+            button.hide_free_shipping_icon();
+    }
+}
+#+end_src
+*** B
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+function update_tax_dom() { A
+    set_tax_dom(shopping_cart_total * 0.10);
+}
+
+function calc_cart_total() { A
+    shopping_cart_total = 0;
+    for(var i = 0; i < shopping_cart.length; i++) {
+        var item = shopping_cart[i];
+        shopping_cart_total += item.price;
+    }
+    set_cart_total_dom();
+    update_shipping_icons();
+    update_tax_dom();
+}
+#+end_src
+*** C
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+- All actions :X
+** Actions spread
+- Actions spread. We only have to identify one action inside a function for the whole function to be an action.
+** MegaMart testing team
+100% coverage or you don’t go home.
+
+#+ATTR_LATEX: :width 150px
+[[./images/l2/screenshot_20230324_053635.png]]
+
+** MegaMart testing
+- The code contains business rules that are not easy to test
+
+- Every time the code changes, George has to write a test to do the following:
+  - Set up a browser
+  - Load a page
+  - Click buttons to add items to the cart
+  - Wait for the DOM to update (it should be easier than this!)
+  - Scrape the value out of the DOM
+  - Parse the string into a number
+  - Compare it to the expected value
+
+** We need to make it more reusable
+Accounting and shipping want to reuse our code, but they can’t for a few reasons:
+
+- The code reads the shopping cart from a global variable, but they need to process orders from the database, not the variable
+- The code writes directly to the DOM, but they need to print tax receipts and shipping labels
+
+** Some suggestions
+*** George from testing
+- Separate business rules from the DOM updates
+- Get rid of global variables
+*** Jenna on dev team
+- Don’t depend on global variables
+- Don’t assume the answer goes in the DOM
+- Return the answer from the function
+** Functions have inputs and outputs
+Inputs and outputs can be implicit or explicit
+- The explicit inputs are the arguments. The explicit output is the return value. Any other way information enters or leaves the function is implicit.
+Implicit inputs and outputs make a function an action
+- If we eliminate all implicit inputs and outputs from an action, it becomes a calculation. The trick is to replace the implicit inputs with arguments, and to replace the implicit outputs with return values.
+** New code
+*** A
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+var shopping_cart = [];
+var shopping_cart_total = 0;
+
+function add_item_to_cart(name, price) {
+    shopping_cart = add_item(shopping_cart, name, price);
+    calc_cart_total();
+}
+
+function calc_cart_total() {
+    shopping_cart_total = calc_total(shopping_cart);
+    set_cart_total_dom();
+    update_shipping_icons();
+    update_tax_dom();
+}
+
+function update_shipping_icons() {
+    var buttons = get_buy_buttons_dom();
+    for(var i = 0; i < buttons.length; i++) {
+        var button = buttons[i];
+        var item = button.item;
+        if(gets_free_shipping(shopping_cart_total,
+                              item.price))
+            button.show_free_shipping_icon();
+        else
+            button.hide_free_shipping_icon();
+    }
+}
+#+end_src
+*** B
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+function update_tax_dom() {
+    set_tax_dom(calc_tax(shopping_cart_total));
+}
+
+function add_item(cart, name, price) {
+    var new_cart = cart.slice();
+    new_cart.push({
+        name: name,
+        price: price
+    });
+    return new_cart;
+}
+
+function calc_total(cart) {
+    var total = 0;
+    for(var i = 0; i < cart.length; i++) {
+        var item = cart[i];
+        total += item.price;
+    }
+    return total;
+}
+
+function gets_free_shipping(total, item_price) {
+    return item_price + total >= 20;
+}
+
+function calc_tax(amount) {
+    return amount * 0.10;
+}
+#+end_src
+*** C
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+- Can you identify the actions, calculations and data?
+** New code
+*** A
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+var shopping_cart = []; A
+var shopping_cart_total = 0; A
+
+function add_item_to_cart(name, price) { A
+    shopping_cart = add_item(shopping_cart, name, price);
+    calc_cart_total();
+}
+
+function calc_cart_total() { A
+    shopping_cart_total = calc_total(shopping_cart);
+    set_cart_total_dom();
+    update_shipping_icons();
+    update_tax_dom();
+}
+
+function update_shipping_icons() { A
+    var buttons = get_buy_buttons_dom();
+    for(var i = 0; i < buttons.length; i++) {
+        var button = buttons[i];
+        var item = button.item;
+        if(gets_free_shipping(shopping_cart_total,
+                              item.price))
+            button.show_free_shipping_icon();
+        else
+            button.hide_free_shipping_icon();
+    }
+}
+#+end_src
+*** B
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+#+latex: \tiny
+#+begin_src js
+function update_tax_dom() { A
+    set_tax_dom(calc_tax(shopping_cart_total));
+}
+
+function add_item(cart, name, price) { C
+    var new_cart = cart.slice();
+    new_cart.push({
+        name: name,
+        price: price
+    });
+    return new_cart;
+}
+
+function calc_total(cart) { C
+    var total = 0;
+    for(var i = 0; i < cart.length; i++) {
+        var item = cart[i];
+        total += item.price;
+    }
+    return total;
+}
+
+function gets_free_shipping(total, item_price) { C
+    return item_price + total >= 20;
+}
+
+function calc_tax(amount) { C
+    return amount * 0.10;
+}
+#+end_src
+*** C
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+- New functions are all calculations that were refactored out :)
+** Revisiting the suggestions
+*** George from testing
+- Separate business rules from the DOM updates (how to calculate the cart total is definitely a business rule)
+- Get rid of global variables (calc_total() no longer relies on global variables)
+*** Jenna on dev team
+- Don’t depend on global variables (yes, it no longer reads from global variables)
+- Don’t assume the answer goes in the DOM (it doesn’t update the DOM)
+- Return the answer from the function (now it has a return value)
+** Learning Points
+- Actions spread. We only have to identify one action inside a function for the whole function to be an action.
+- Functions that are actions will have implicit inputs and outputs.
+- Calculations have no implicit inputs or outputs by definition.
+- Shared variables (such as globals) are common implicit inputs and outputs.
+- Implicit inputs can often be replaced by arguments.
+- Implicit outputs can often be replaced by return values.
+- As we apply functional principles, we’ll find the ratio of code in actions to code in calculations shifting toward calculations.
+
+* Immutability
+** What is immutability
+- +un+ fortunately even in js some things do already have immutability
+#+begin_src js
+Array1 = new Array("A", "B", "C");
+console.log("Array1:", Array1);
+Array2 = Array1.concat("D")
+console.log("Array2:", Array2);
+console.log("Array1:", Array1);
+
+// Array1: A,B,C
+// Array2: A,B,C,D
+// Array1: A,B,C  // if concat were a mutation,
+                  // Array1 would be A,B,C,D here
+#+end_src
+** Getting burnt by immutability 1
+#+ATTR_LATEX: :width 300px
+[[./images/l2/screenshot_20230324_172244.png]]
+** Getting burnt by immutability 1
+#+latex: \footnotesize
+#+begin_src js
+Array.prototype.insert = function ( index, ...items ) {
+    this.splice( index, 0, ...items );
+};
+
+function replan(plan, new_city, before_city){
+  new_city_index = plan.indexOf(before_city);
+  plan.insert(new_city_index,new_city);
+  return plan;
+}
+
+planA = new Array();
+planA.push("Paris");
+planA.push("Berlin");
+planA.push("Krakow");
+console.log("Plan A:", planA); // Plan A: Paris,Berlin,Krakow
+planB = replan(planA, "Vienna", "Krakow");
+console.log("Plan B:", planB); // Plan B: Paris,Berlin,Vienna,Krakow
+console.log("Plan A:", planA); // Plan A: Paris,Berlin,Vienna,Krakow
+#+end_src
+** Getting burnt by immutability 1
+#+ATTR_LATEX: :width 300px
+[[./images/l2/screenshot_20230324_173023.png]]
+** Getting burnt by immutability 2
+#+ATTR_LATEX: :width 300px
+[[./images/l2/screenshot_20230324_174140.png]]
+** Getting burnt by immutability 2
+#+latex: \scriptsize
+#+begin_src js
+function totalTime(lap_times) {
+    lapTimes.splice(0, 1);
+    sum = 0;
+    for (var x of lapTimes) {
+        sum += x;
+    }
+    return sum;
+}
+
+function avgTime(lap_times) {
+    time = totalTime(lapTimes);
+    laps = lapTimes.length;
+    return time / laps;
+}
+
+lapTimes = new Array()
+lapTimes.push(31.0); // warm-up lap (not taken into calculations)
+lapTimes.push(20.9);
+lapTimes.push(21.1);
+lapTimes.push(21.3);
+
+console.log("Total: ", totalTime(lapTimes)); // Total:  63.3
+console.log("Avg: ", avgTime(lapTimes)) // Avg:  21.200000000000003
+#+end_src
+** Getting burnt by immutability 2
+#+ATTR_LATEX: :width 300px
+[[./images/l2/screenshot_20230324_173319.png]]
+** Getting burnt by immutability 2
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230324_173439.png]]
+** Isn’t copying bad in terms of performance?
+Yes, it’s worse than just modifying things in place. However, we can argue that it’s usually not relevant in the majority of applications. This means that in many cases readability and maintainability of the codebase far exceeds a potential performance drop.
+** So, if I’m using functional programming, my applications will be slow?
+- Not necessarily.
+- The best approach to performance analysis is, firstly, making sure that you are optimizing the right thing. You need to find the bottleneck and only then try to optimize it.
+- If you are sure that an immutable operation is the main culprit, you still have several options.
+- For example, if your problem is that you are frequently adding something to a very big list (linked-list), then instead of appended you can use the prepended, function that adds an element at the beginning in constant time without copying or changing the old one
+* Staying immutable in a mutable language
+** Defensive riding equivalent in programming
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230323_201009.png]]
+** Immutability
+- Functional programmers use two main disciplines for implementing immutable data:
+  - Copy-on-write
+    - Make a copy of data before you modify it.
+  - Defensive copying
+    - Make a copy of data you want to keep.
+** Copy on write
+*** Rules of copy-on-write
+- Make a copy.
+- Modify the copy.
+- Return the copy.
+** Defensive copying
+*** Rules of defensive copying
+- Make a deep copy of data as it enters the safe zone.
+- Make a deep copy of data as it leaves the safe zone.
+*** Example
+#+begin_src js
+function payrollCalcSafe(employees) {
+    var copy = deepCopy(employees);
+    var payrollChecks = payrollCalc(copy);
+    return deepCopy(payrollChecks);
+}
+#+end_src
+
+
+** Copy-on-write vs defensive copying
+*** Copy-on-write and defensive copying seem very similar. Are they really different? Do we need both?
+- Copy-on-write and defensive copying are both used to enforce immutability, so it seems like we should only need one. The fact is that you could get away with only doing defensive copying, even inside the safe zone. That would enforce immutability just fine.
+
+- However, defensive copying makes deep copies. Deep copies are much more expensive than shallow copies because they copy the entire nested data structure from top to bottom. We don’t need to make so many copies when we trust the code we’re passing data to. So in order to save the processing and memory of all of those copies, we use copy-on-write when we can, which is everywhere inside the safe zone. The two disciplines work together.
+
+- It’s important to compare the two approaches so that we can have a better understanding of when to use each. Let’s do that now.
+
+** Copy-on-write and defensive copying compared
+*** When to use it
+- Use copy-on-write when you need to modify data you control.
+- Use defensive copying when exchanging data with untrusted code.
+*** Where to use it
+- You should use copy-on-write everywhere inside the safe zone. In fact, the copy-on-write defines your immutability safe zone.
+- Use defensive copying at the borders of your safe zone for data that has to cross in or out.
+*** Type of copy
+- Shallow copy—relatively cheap
+- Deep copy—relatively expensive
+** Shallow copy vs Deep copy
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230324_132544.png]]
+
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230324_132617.png]]
+* First class functions
+** Examples of things you can do with a first-class value
+- Assign it to a variable.
+- Pass it as an argument to a function.
+- Return it from a function.
+- Store it in an array or object.
+** Passing Functions as parameters
+- for each
+- sort-by
+- map
+- filter
+- reduce
+** For each (javascript)
+#+begin_src js
+function forEach(array, f) {
+    for(var i = 0; i < array.length; i++) {
+        var item = array[i];
+        f(item);
+    }
+}
+#+end_src
+
+#+begin_comment
+First class functions
+#+begin_src py
+fruits = ["apple", "banana", "cherry"]
+for x in fruits:
+  print(x)
+#+end_src
+
+#+begin_src clojure
+(for [x [:apple :banana :cherry]]
+  x)
+#+end_src
+#+end_comment
+
+** Sort-by
+#+latex: \footnotesize
+#+begin_src clojure
+;; Q1: Sort the list of Strings by their length in ascending order.
+["scala", "rust", "ada"]
+;; => ("ada", "rust", "scala")
+
+;; Q2: Sort the list of Strings provided below by number of the letter 's'
+;; inside these Strings, in ascending order.
+["rust", "ada"]
+;; => ("ada", "rust")
+
+;; Q3: Sort the list of Ints provided below in descending order.
+[5, 1, 2, 4, 3]
+;; => (5, 4, 3, 2, 1)
+
+;; Similarly to the second one, sort the list of Strings provided below by
+;; number of the letter 's' inside these Strings but in descending order.
+["ada", "rust"]
+;; => ("rust", "ada")
+#+end_src
+
+** Map
+Map transforms an array into a new array. Each element is transformed with the callback you specify.
+
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230323_205604.png]]
+** Map Exercise
+#+latex: \footnotesize
+#+begin_src clojure
+;; Q1: Length of Strings
+["clojure" "rust" "ada"]
+;; => (7 4 3)
+
+;; Q2: Number of letter 'o'
+["doom-emacs" "neovim" "vscode"]
+;; => (2 1 1)
+
+;; Q3: Double all ints
+[5 1 2 4 0]
+;; => (10 2 4 8 0)
+
+;; Q4: Negate all ints
+[5 1 2 4 0]
+;; => (-5 -1 -2 -4 0)
+
+#+end_src
+** Map implementation
+#+begin_src js
+function map(array, f) {
+    var newArray = [];
+    forEach(array, function(element) {
+        newArray.push(f(element));
+    });
+    return newArray;
+}
+#+end_src
+** Filter
+Filter selects a subset of elements from one array into a new array. You choose which elements are selected by passing in a predicate.
+
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230323_205807.png]]
+
+** Filter Exercise
+#+latex: \footnotesize
+#+begin_src clojure
+;; Q1: Return words that are shorter than five characters.
+["scala" "rust" "ada"]
+;; => ("rust", "ada")
+
+;; Q2: Return words that have more than two of the letter 'o'.
+["rust" "ada"]
+;; => ()
+
+;; Q3: Return a new List with only odd numbers.
+[5 1 2 4 0]
+;; => [5 1]
+
+;; Q4: Return a new List with all numbers larger than 4.
+[5 1 2 4 0]
+;; => [5]
+#+end_src
+** Filter implementation
+#+begin_src js
+function filter(array, f) {
+    var newArray = [];
+    forEach(array, function(element) {
+        if(f(element))
+            newArray.push(element);
+    });
+    return newArray;
+}
+#+end_src
+** Reduce
+Reduce combines elements of an array, along with an initial value, into a single value. It is used to summarize data or to build a value from a sequence.
+#+ATTR_LATEX: :width 200px
+[[./images/l2/screenshot_20230323_205839.png]]
+** Reduce implementation
+#+begin_src js
+function reduce(array, init, f) {
+    var accum = init;
+    forEach(array, function(element) {
+        accum = f(accum, element);
+    });
+    return accum;
+}
+#+end_src
+** Reduce Exercise
+#+latex: \footnotesize
+#+begin_src clojure
+;; Q1: Return a sum of all integers in the given list
+[5 1 2 4 100]
+;; => 112
+
+;; Q2: Return the total length of all the words in the given list
+["scala" "rust" "ada"]
+;; => 12
+
+;; Q3: Return the number of the letter 's' found in all the words in the given list
+["scala" "haskell" "rust" "ada"]
+;; => 3
+
+;; Q4: Return the maximum of all integers in the given list
+[5, 1, 2, 4, 15]
+;; => 15
+#+end_src
+
+* Some additional features of Functional Programming (extra)
+** Anonymous functions
+- since functions are first class, just as how you can use data without defining them so can be done for functions
+#+begin_src clojure
+(fn [x] (inc x))
+;; Short-hand
+#(inc %)
+
+(defn increment [x]
+  (inc x))
+
+(def increment
+  (fn [x]
+    (inc x)))
+
+(fn [a b] (+ a b))
+;; Short-hand - not recommended
+#(+ %1 %2)
+#+end_src
+** Apply
+#+begin_src clojure
+(apply str ["str1" "str2" "str3"])  ;;=> "str1str2str3"
+(str "str1" "str2" "str3")          ;;=> "str1str2str3"
+#+end_src
+** Some functions which return functions (comp, partial, juxt)
+#+begin_src clojure
+;; Extra higher order functions if needed
+;; comp, partial juxt
+(map (juxt dec inc) (range 5))
+;; => ([-1 1] [0 2] [1 3] [2 4] [3 5])
+
+(map (comp str inc) (range 5))
+;; => ("1" "2" "3" "4" "5")
+
+(map (partial * 10) (range 5))
+;; => (0 10 20 30 40)
+#+end_src
